@@ -35,18 +35,34 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Detect DevTools
-(function() {
-  const threshold = 160;
+// Safer: show overlay instead of wiping body
+(function () {
+  const threshold = 260; // เพิ่มให้ห่างขึ้นหน่อย ลด false positive
+  let shown = false;
+
   setInterval(() => {
-    if (
-      window.outerWidth - window.innerWidth > threshold ||
-      window.outerHeight - window.innerHeight > threshold
-    ) {
-      document.body.innerHTML = '';
+    const w = window.outerWidth - window.innerWidth;
+    const h = window.outerHeight - window.innerHeight;
+
+    const devtoolsLikely = (w > threshold || h > threshold);
+
+    if (devtoolsLikely && !shown) {
+      shown = true;
+      const overlay = document.createElement('div');
+      overlay.id = 'devtools-overlay';
+      overlay.style.cssText =
+        'position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999999;font-family:system-ui;';
+      overlay.textContent = 'Access restricted';
+      document.body.appendChild(overlay);
     }
-  }, 500);
+
+    if (!devtoolsLikely && shown) {
+      shown = false;
+      document.getElementById('devtools-overlay')?.remove();
+    }
+  }, 800);
 })();
+
 </script>
 
 
